@@ -1,7 +1,7 @@
 /**
  * 
  */
-function getPalette(picture, scale, amountToPick, minCoverage, bundleDistance, paletteElement) {
+function getPalette(picture, scale, amountToPick, minCoverage, paletteElement) {
     console.log('getPalette');
 
     // Downscale the picture
@@ -11,7 +11,7 @@ function getPalette(picture, scale, amountToPick, minCoverage, bundleDistance, p
     const pixels = extractPixels(context);
 
     // Find the X most common colors
-    const mostCommonColors = findMostCommonColors(context, pixels, amountToPick, minCoverage, bundleDistance);
+    const mostCommonColors = findMostCommonColors(context, pixels, amountToPick, minCoverage);
 
     // Print out the palette to the document
     printPalette(mostCommonColors, paletteElement);
@@ -112,11 +112,8 @@ function extractPixels(context) {
  * @param {number[][][]} pixels - The 3d array of pixels.
  * @param {number} amountToPick - The amount of colors to pick.
  * @param {number} minCoverage - The minimum coverage of the color in the picture.
- * @param {number} bundleDistance - The minimum distance between the colors.
  */
-function findMostCommonColors(context, pixels, amountToPick, minCoverage, bundleDistance) {
-
-    bundleDistance = (1 / amountToPick) * 0.8;
+function findMostCommonColors(context, pixels, amountToPick, minCoverage) {
 
     console.log('findMostCommonColors');
     
@@ -141,29 +138,42 @@ function findMostCommonColors(context, pixels, amountToPick, minCoverage, bundle
     
     console.log(`Given colors: `, colors);
 
-    // Calculate the man distance between two colors
-    let maxDistance = 0;
+    // Calculate the man distance between two colors to shrink the color space.
+    let maxColorSpaceDistance = 0;
     for (let i = 0; i < colors.length; i++) {
         for (let j = i + 1; j < colors.length; j++) {
-            const distance = calculateDistance([colors[i].r, colors[i].g, colors[i].b], [colors[j].r, colors[j].g, colors[j].b]);
-            if (distance > maxDistance) {
-                maxDistance = distance;
+            const maxDistance = calculateDistance([colors[i].r, colors[i].g, colors[i].b], [colors[j].r, colors[j].g, colors[j].b]);
+            if (maxDistance > maxColorSpaceDistance) {
+                maxColorSpaceDistance = maxDistance;
             }
         }
     }
+    console.log(`maxColorSpaceDistance: ${maxColorSpaceDistance}`);
 
-    // Sort the array by the score
+    // Sort the array by the amount of pixels of each color
     colors.sort((a, b) => b.amount - a.amount);
 
-    // Bundle/merge colors that are close to each other
+    const bundleDistance = maxColorSpaceDistance / (amountToPick * (maxColorSpaceDistance / 443.405));
+    console.log(`bundleDistance: ${bundleDistance}`);
+
+    // Bundle/merge colors that are close to each other and merge the second color into the first color
     for (let i = 0; i < colors.length; i++) {
+        let mergedColors = 0;
         for (let j = i + 1; j < colors.length; j++) {
-            if (calculateDistance([colors[i].r, colors[i].g, colors[i].b], [colors[j].r, colors[j].g, colors[j].b]) < bundleDistance * maxDistance) {
-                //colors[i].amount += colors[j].amount;
+            if (calculateDistance([colors[i].r, colors[i].g, colors[i].b], [colors[j].r, colors[j].g, colors[j].b]) < bundleDistance) {
+                colors[i].amount += colors[j].amount;
+                //colors[i].r += colors[j].r;
+                //colors[i].g += colors[j].g;
+                //colors[i].b += colors[j].b;
                 colors.splice(j, 1);
                 j--;
+                mergedColors++;
             }
         }
+        //colors[i].r /= mergedColors + 1;
+        //colors[i].g /= mergedColors + 1;
+        //colors[i].b /= mergedColors + 1;
+        colors[i].amount = Math.log(colors[i].amount);
     }
 
     console.log(`Colors after bundeling: `, colors);
@@ -207,7 +217,7 @@ function findMostCommonColors(context, pixels, amountToPick, minCoverage, bundle
         colors[i].score += Math.exp(colors[i].amount * totalDistance);
     }*/
 
-    console.log(`Colors after increasing score of colors close to colorSpaceCenter:`, colors);
+    //console.log(`Colors after increasing score of colors close to colorSpaceCenter:`, colors);
 
     // Calculate total amount.
     let totalAmount = 0;
@@ -227,86 +237,25 @@ function findMostCommonColors(context, pixels, amountToPick, minCoverage, bundle
         }
         totalDistance /= colors.length;
 
-        const distance = calculateDistance([colors[i].r, colors[i].g, colors[i].b], colorSpaceCenter);
-        colors[i].score += Math.log(1 + colors[i].amount) * Math.log(1 + totalDistance);
+        // Increase the score based of the distance from the colorSpaceCenter
+        //colors[i].score += Math.log(1 + colors[i].amount)
+        colors[i].score += Math.log(1 + totalDistance * colors[i].amount) * (443.405 / maxColorSpaceDistance);
         //if (colors[i].amount >= minCoverage * pixelAmount)
         //colors[i].score += (1 - colors[i].amount / pixelAmount) * Math.exp(distance * 0.2);
     }
 
-    for (let i = 0; i < colors.length; i++) {
-        // Calculate total distance from all other colors
-        let totalDistance = 0;
-        for (const color of colors) {
-            totalDistance += calculateDistance([colors[i].r, colors[i].g, colors[i].b], [color.r, color.g, color.b]);
-        }
-        totalDistance /= colors.length;
-        const distance = calculateDistance([colors[i].r, colors[i].g, colors[i].b], colorSpaceCenter);
-        // Increase the score based of the distance from the colorSpaceCenter
-        colors[i].score += Math.log(totalAmount - colors[i].amount) * Math.log(1 + totalDistance);
-    }
-
-
-    // Add score based on distance from the eight corners of the color space
-    /*for (let i = 0; i < colors.length; i++) {
-        const distance = Math.min(
-            calculateDistance([colors[i].r, colors[i].g, colors[i].b], [0, 0, 0]),
-            calculateDistance([colors[i].r, colors[i].g, colors[i].b], [255, 0, 0]),
-            calculateDistance([colors[i].r, colors[i].g, colors[i].b], [0, 255, 0]),
-            calculateDistance([colors[i].r, colors[i].g, colors[i].b], [0, 0, 255]),
-            calculateDistance([colors[i].r, colors[i].g, colors[i].b], [255, 255, 0]),
-            calculateDistance([colors[i].r, colors[i].g, colors[i].b], [255, 0, 255]),
-            calculateDistance([colors[i].r, colors[i].g, colors[i].b], [0, 255, 255]),
-            calculateDistance([colors[i].r, colors[i].g, colors[i].b], [255, 255, 255])
-        );
-        colors[i].score += (pixelAmount - colors[i].amount) * Math.log(distance);
-    }*/
-
-    // Sort based on max total distance from the other colors.
-    /*colors.sort((a, b) => {
-        let totalDistanceA = 0;
-        let totalDistanceB = 0;
-        for (const color of colors) {
-            totalDistanceA += calculateDistance([a.r, a.g, a.b], [color.r, color.g, color.b]);
-            totalDistanceB += calculateDistance([b.r, b.g, b.b], [color.r, color.g, color.b]);
-        }
-        return totalDistanceB - totalDistanceA;
-    });*/
-
     // Reorder the array
     colors.sort((a, b) => b.score - a.score);
 
+    // Make space for other colors of any are close to the top and black or white has been included
+    if (calculateDistance([colors[0].r, colors[0].g, colors[0].b], [0, 0, 0]) < 20)
+        colors.splice(amountToPick-1, 1);
+    if (calculateDistance([colors[0].r, colors[0].g, colors[0].b], [255, 255, 255]) < 20)
+        colors.splice(amountToPick-1, 1);
+
     // Slice the array to the X most common colors
     colors = colors.slice(0, amountToPick);
-/*
-    // Calculate center of the color space of selected colors
-    let colorSpaceCenterSelected = [0, 0, 0];
-    let countSelected = 0;
-    for (const color of colors) {
-        colorSpaceCenterSelected[0] += color.r * color.amount;
-        colorSpaceCenterSelected[1] += color.g * color.amount;
-        colorSpaceCenterSelected[2] += color.b * color.amount;
-        countSelected += color.amount;
-    }
-    colorSpaceCenterSelected[0] /= countSelected;
-
-    // Sort by distance to the colorSpaceCenterSelected
-    colors.sort((a, b) => {
-        const distanceA = calculateDistance([a.r, a.g, a.b], colorSpaceCenterSelected);
-        const distanceB = calculateDistance([b.r, b.g, b.b], colorSpaceCenterSelected);
-        return distanceA - distanceB;
-    });
-
-    // Add first color to the result array
-    // Then compare each color to the latest color in the result array
-    // If the distance is greater than the minDistance add it to the result array
-    /*const result = [colors[0]];
-    for (const color of colors) {
-        if (result.every(c => calculateDistance([c.r, c.g, c.b], [color.r, color.g, color.b]) > minDistance)) {
-            result.push(color);
-        }
-    }
-
-        colors.sort((a, b) => b.score - a.score);*/
+    
     console.log(`Colors after sorting: `, colors);
 
     // Return the X most common colors
