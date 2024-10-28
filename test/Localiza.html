@@ -3,58 +3,30 @@
 <head>
     <title>Test</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-    <script src="test.js"></script>
+    <script src="test_3_0.js"></script>
     <script>
-/*
-        // Settings
-        const SAMPLE_AMOUNT = 10;
-        const SAMPLING_QUALITY = 10;
-
-        const colorThief = new ColorThief();
-
-        // Print colors
-        function printColors(colors) {
-            const colorsDiv = document.getElementById('colors');
-            colorsDiv.innerHTML = '';
-
-            colors.forEach(color => {
-                const colorDiv = document.createElement('div');
-                colorDiv.style.width = '20px';
-                colorDiv.style.height = '20px';
-                colorDiv.style.backgroundColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-                colorsDiv.appendChild(colorDiv);
-            });
-        }
-
-        // Get the dominant color
-        function getDominantColor(img) {
-            const color = colorThief.getPalette(img, SAMPLE_AMOUNT, SAMPLING_QUALITY);
-            printColors(color);
-        }
-
-        // When document is loaded
         document.addEventListener('DOMContentLoaded', function() {
-            const img = document.querySelector('img');
-            img.setAttribute('crossorigin', 'anonymous');
-
-            // Make sure image is finished loading
-            if (img.complete) {
-                getDominantColor(img);
-            } else {
-                img.addEventListener('load', function() {
-                    getDominantColor(img);
-                });
-            }
-        });
-*/
-        // Test.
-        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded');
+            const paletteron = new Paletteron();
             // For each image
             const imgHolders = document.querySelectorAll('.img-holder');
             imgHolders.forEach(imgHolder => {
                 const img = imgHolder.querySelector('img');
-                const palette = imgHolder.querySelector('.palette');
-                getPalette(img, 0.2, 5, 0.001, palette);
+                const paletteElement = imgHolder.querySelector('.palette');
+
+                // Add listener to wait for image to be loaded
+                if (img.complete) {
+                    console.log('Image already loaded');
+                    const palette = paletteron.getPalette(img);
+                    paletteron.printPalette(palette, paletteElement);
+                } else {
+                    img.addEventListener('load', () => {
+                        console.log('Image loaded');
+                        const palette = paletteron.getPalette(img);
+                        paletteron.printPalette(palette, paletteElement);
+                    });
+                }
+        
             });
         });
     </script>
