@@ -14,12 +14,12 @@ Before usage, you need to install/include required files.
 File hosted by [JSDELIVER](https://www.jsdelivr.com/). Simply add this code to your site:
 
 ```
-<script src="https://cdn.jsdelivr.net/gh/williamfridh/Paletteron-Image-Scanner-Palette-Maker@main/Paletteron.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/williamfridh/Paletteron-Image-Scanner-Palette-Generator@main/dist/Paletteron.min.js"></script>
 ```
 
 ### Option 2
 
-Download and include **Paletteron.min.js** from the dist folder or **Paletteron.js** if you wish to have readable code.
+Download and include **Paletteron.min.js** or **Paletteron.js** from the dist folder if you wish to have readable code.
 
 ## How to Use
 
