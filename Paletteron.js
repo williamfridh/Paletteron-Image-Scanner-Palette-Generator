@@ -5,6 +5,15 @@
  * The logic is based on pixel extraction and counting, bundling,
  * comparing vectors distances, and based on this assigning score.
  * 
+ * HOW TO USE:
+ * 1. Include the script in your HTML file.
+ * 2. Create a new Paletteron object with optional parameters.
+ * 3. Load an image and call getPalette with the image element.
+ * 4. The palette will be returned as an array of RGB values.
+ * 
+ * OPTIONAL STEPS:
+ * 5. Print the palette to an HTML element for debugging by calling printDebuggingPalette.
+ * 
  * NOTES:
  * 1. Make sure to set the CORS policy of the image to anonymous (can be set by getPalette).
  * 2. The scale, colorsToPick, and minCoverage can be set in the constructor.
@@ -52,9 +61,14 @@ class Paletteron {
      * Extracts a color palette from an image element.
      * 
      * @param {HTMLImageElement} imageElement - The image element to extract the palette from.
+     * @param {boolean} forceAnonymous - Whether to force the CORS policy to anonymous.
      * @returns {number[][]} - The extracted color palette as an array of RGB values.
      */
-    getPalette(imageElement) {
+    getPalette(imageElement, forceAnonymous = false) {
+
+        // Set the CORS policy to anonymous if forced
+        if (forceAnonymous) imageElement.crossOrigin = 'anonymous';
+
         // Downscale the image
         const [canvas, context] = this.downscale(imageElement);
 
@@ -115,17 +129,17 @@ class Paletteron {
      */
     downscale(picture) {
         // Calculate new dimensions
-        const width = picture.width * this.scale;
-        const height = picture.height * this.scale;
+        const w = picture.width * this.scale;
+        const h = picture.height * this.scale;
 
         // Create a canvas element
         const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = w;
+        canvas.height = h;
         const context = canvas.getContext('2d');
 
         // Draw the picture on the canvas
-        context.drawImage(picture, 0, 0, width, height);
+        context.drawImage(picture, 0, 0, w, h);
 
         // Append the canvas to the document (hidden)
         document.body.appendChild(canvas);
