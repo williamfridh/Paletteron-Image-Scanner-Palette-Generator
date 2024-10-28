@@ -1,5 +1,5 @@
 ﻿
-<center><img src="https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/logo.jpg?raw=true" alt="Example of color palettes" style="max-width: 200px"></center>
+<img src="https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/logo.jpg?raw=true" alt="Paletteron logo">
 
 
 # Paletteron - Image Scanner & Palette Maker
