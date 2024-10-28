@@ -1,5 +1,4 @@
-﻿
-<img src="https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/logo.jpg?raw=true" alt="Paletteron logo">
+﻿![Paletteron logo](https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/logo.jpg?raw=true)
 
 
 # Paletteron - Image Scanner & Palette Maker
