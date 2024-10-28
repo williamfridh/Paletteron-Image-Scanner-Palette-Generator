@@ -122,7 +122,7 @@ class Paletteron {
      * Prints the color palette to a specified HTML element for debugging purposes.
      * 
      * @param {number[][]} palette - The palette to print.
-     * @param {HTMLElement} paletteElement - The element to print the palette to.
+     * @param {HTMLElement} palette - The element to print the palette to.
      */
     printDebuggingPalette(palette, paletteElement) {
         // Clear the element
