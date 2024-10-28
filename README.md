@@ -1,7 +1,7 @@
 ﻿![Paletteron logo](https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/logo.jpg?raw=true)
 
 
-# Paletteron - Image Scanner & Palette Maker
+# Scan Image and Generator Palette
 
 **Paletteron is a free to use JavaScript-based tool for scanning images (img elements) and generating color palettes on the front-end. It's plain JavaScript and comes with support for a list of options to make it fi tyou the best.**
 
