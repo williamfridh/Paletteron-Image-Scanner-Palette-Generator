@@ -1,4 +1,4 @@
-﻿![Example of color palettes](https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/logo.png?raw=true)
+﻿![Example of color palettes](https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/logo.jpg?raw=true)
 
 # Paletteron - Image Scanner & Palette Maker
 
@@ -61,4 +61,4 @@ if (img.complete) {
 ```
 
 ### Result Example
-![Example of color palettes](https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/example_1.png?raw=true)
+![Example of color palettes](https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/Example_1.png?raw=true)
