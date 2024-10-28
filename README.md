@@ -1,16 +1,24 @@
-﻿# Paletteron - Image Scanner & Palette Maker
+﻿![Example of color palettes](https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/logo.png?raw=true)
+
+# Paletteron - Image Scanner & Palette Maker
 
 **Paletteron is a free to use JavaScript-based tool for scanning images (img elements) and generating color palettes. It's plain JS and comes with support for a list of options.**
 
 ## Installation
 
-To get started, you have two options:
-1. Download and include **Paletteron.min.js** or **Paletteron.js** if you wish to have readable code.
-2. Include the following JS-file:
+Before usage, you need to install/include required files.
+
+### Option 1
+
+File hosted by [JSDELIVER](https://www.jsdelivr.com/). Simply add this code to your site:
 
 ```
 <script src="https://cdn.jsdelivr.net/gh/williamfridh/Paletteron-Image-Scanner-Palette-Maker@main/Paletteron.min.js"></script>
 ```
+
+### Option 2
+
+Download and include **Paletteron.min.js** or **Paletteron.js** if you wish to have readable code.
 
 ## How to Use
 
@@ -18,7 +26,8 @@ To get started, you have two options:
 2. Create a new Paletteron object with optional parameters.
 3. Load an image and call getPalette with the image element.
 4. The palette will be returned as an array of RGB values.
-5. (Optional step for debugging) Print the palette to an HTML element for debugging by calling printDebuggingPalette.
+5. Print or do something else cool with the receiver data!
+6. (Optional step for debugging) Print the palette to an HTML element for debugging by calling printDebuggingPalette.
 
 ## Calling getPalette()
 **PARAMETERS:**
@@ -35,6 +44,9 @@ To get started, you have two options:
 Before sending the img element to Palettereon, you need to make sure it's fully loaded. This can be done in many different ways. For instance:
 
 ```
+const img = imgHolder.querySelector('img');
+const paletteElement = imgHolder.querySelector('.palette');
+
 if (img.complete) {
     console.log('Image already loaded');
     const palette = paletteron.getPalette(img);
@@ -49,4 +61,4 @@ if (img.complete) {
 ```
 
 ### Result Example
-![Example of color palettes](https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/Example_1.png?raw=true)
+![Example of color palettes](https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker/blob/main/assets/example_1.png?raw=true)
