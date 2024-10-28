@@ -20,7 +20,7 @@ File hosted by [JSDELIVER](https://www.jsdelivr.com/). Simply add this code to y
 
 ### Option 2
 
-Download and include **Paletteron.min.js** or **Paletteron.js** if you wish to have readable code.
+Download and include **Paletteron.min.js** from the dist folder or **Paletteron.js** if you wish to have readable code.
 
 ## How to Use
 
