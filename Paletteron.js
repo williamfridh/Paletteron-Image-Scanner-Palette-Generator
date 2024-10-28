@@ -14,13 +14,22 @@
  * OPTIONAL STEPS:
  * 5. Print the palette to an HTML element for debugging by calling printDebuggingPalette.
  * 
+ * PARAMETERS:
+ * 1. scale - The scale to downscale the image with (recommended is 0.3).
+ * 2. colorsToPick - The amount of colors to pick from the image (recommended is 5).
+ * 3. minCoverage - The minimum coverage of a color to be included in the palette (recommended is 0).
+ * 4. minWhiteDistance - Percentage of maximum color space distance to be min to include color (recommended is 0).
+ * 5. minBlackDistance - Percentage of maximum color space distance to be min to include color (recommended is 0).
+ * 
  * NOTES:
  * 1. Make sure to set the CORS policy of the image to anonymous (can be set by getPalette).
  * 2. The scale, colorsToPick, and minCoverage can be set in the constructor.
  * 3. The image must be loaded before calling getPalette (see test/all.html).
  * 
- * Author: William Fridh
- * GitHub: https://github.com/williamfridh
+ * Author:      William Fridh
+ * GitHub:      https://github.com/williamfridh
+ * Repository:  https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker
+ * Version:     1.0.2
  */
 
 class Paletteron {
@@ -42,8 +51,10 @@ class Paletteron {
      * @param {number} scale - The scale to downscale the image with.
      * @param {number} colorsToPick - The amount of colors to pick from the image.
      * @param {number} minCoverage - The minimum coverage of a color to be included in the palette.
+     * @param {number} minWhiteDistance - Percentage of maximum color space distance to be min to include color.
+     * @param {number} minBlackDistance - Percentage of maximum color space distance to be min to include color.
      */
-    constructor(scale, colorsToPick, minCoverage) {
+    constructor(scale, colorsToPick, minCoverage, minWhiteDistance, minBlackDistance) {
         // Check input values
         if (scale && (scale < 0 || scale > 1))
             throw new Error(`Scale must be between 0 and 1.`)
@@ -51,10 +62,16 @@ class Paletteron {
             throw new Error(`Colors to pick must be between 1 and ${Paletteron.MAX_COLORS_AMOUNT}.`)
         if (minCoverage && (minCoverage < 0 || minCoverage > 1))
             throw new Error(`Min coverage must be between 0 and 1.`)
+        if (minWhiteDistance && (minWhiteDistance < 0 || minWhiteDistance > 1))
+            throw new Error(`Ignore bright must be between 0 and 1.`)
+        if (minBlackDistance && (minBlackDistance < 0 || minBlackDistance > 1))
+            throw new Error(`Ignore dark must be between 0 and 1.`)
         // Set the values
-        this.scale          = scale          || 0.2
-        this.colorsToPick   = colorsToPick   || 5
-        this.minCoverage    = minCoverage    || 0.001
+        this.scale                  = scale                 || 0.2
+        this.colorsToPick           = colorsToPick          || 5
+        this.minCoverage            = minCoverage           || 0
+        this.minWhiteDistance       = minWhiteDistance      || 0
+        this.minBlackDistance       = minBlackDistance      || 0
     }
 
     /**
@@ -78,12 +95,19 @@ class Paletteron {
         // Process the pixels to find the most common colors
         const flattenedColors = this.flattenColors(pixels);
         console.log(`flattenedColors: `, flattenedColors);
-        const bundledColors = this.bundleColors(flattenedColors);
+
+        const colorsWithoutBrightDark = this.removeBrightDarkColors(flattenedColors);
+        console.log(`colorsWithoutBrightDark: `, colorsWithoutBrightDark);
+
+        const bundledColors = this.bundleColors(colorsWithoutBrightDark);
         console.log(`bundledColors: `, bundledColors);
-        const noLowCoverageColors = this.removeLowCoverageColors(bundledColors);
+
+        const noLowCoverageColors = this.removeLowCoverageColors(bundledColors, pixels.length);
         console.log(`noLowCoverageColors: `, noLowCoverageColors);
+
         const colorsWithScore = this.calculateScore(noLowCoverageColors);
         console.log(`colorsWithScore: `, colorsWithScore);
+
         const finalColors = this.finalizeColors(colorsWithScore);
         console.log(`finalColors: `, finalColors);
 
@@ -152,6 +176,23 @@ class Paletteron {
     }
 
     /**
+     * Remove too color if within 10% of white or black.
+     * 
+     * This method removes colors that are too close to white or black.
+     * 
+     * @param {Object[]} colors - The array of color objects.
+     * @returns {Object[]} - The filtered array of color objects.
+     */
+    removeBrightDarkColors(colors) {
+        if (this.minBlackDistance === 0 && this.minWhiteDistance === 0) return colors
+        return colors.filter(color => {
+            const darkDistanceScaler = Paletteron.MAX_COLORS_SPACE_DISTANCE * this.minBlackDistance;
+            const brightDistanceScaler = Paletteron.MAX_COLORS_SPACE_DISTANCE * this.minWhiteDistance;
+            return this.calculateDistance([color.r, color.g, color.b], [255, 255, 255]) > brightDistanceScaler && this.calculateDistance([color.r, color.g, color.b], [0, 0, 0]) > darkDistanceScaler;
+        });
+    }
+
+    /**
      * Extracts pixel data from a canvas context and generates a 3D array of color counts.
      * 
      * @param {CanvasRenderingContext2D} context - The canvas context to extract the pixels from.
@@ -201,11 +242,12 @@ class Paletteron {
      * This is used to avoid color transition contamination.
      * 
      * @param {Object[]} colors - The array of color objects.
+     * @param {number} totalPixels - The total amount of pixels in the image.
      * @returns {Object[]} - The filtered array of color objects.
      */
-    removeLowCoverageColors(colors) {
+    removeLowCoverageColors(colors, totalPixels) {
         // Calculate the total amount of pixels.
-        const totalPixels = colors.reduce((acc, color) => acc + color.amount, 0);
+        //const totalPixels = colors.reduce((acc, color) => acc + color.amount, 0);
         const minAmount = totalPixels * this.minCoverage;
         return colors.filter(color => color.amount >= minAmount);
     }

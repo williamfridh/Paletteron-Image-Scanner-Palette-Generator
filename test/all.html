@@ -3,11 +3,11 @@
 <head>
     <title>Test</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-    <script src="../Paletteron.min.js"></script>
+    <script src="../Paletteron.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOMContentLoaded');
-            const paletteron = new Paletteron();
+            const paletteron = new Paletteron(0.3, 5);
             // For each image
             const imgHolders = document.querySelectorAll('.img-holder');
             imgHolders.forEach(imgHolder => {
@@ -45,7 +45,7 @@
 </head>
 <body>
     <div class="img-holder">
-    <img src="img/Localiza.jpg" width="400" />
+        <img src="img/Localiza.jpg" width="400" />
         <div class="palette"></div>
     </div>
     <div class="img-holder">
@@ -74,6 +74,14 @@
     </div>
     <div class="img-holder">
         <img src="img/Meta.jpg" width="400" />
+        <div class="palette"></div>
+    </div>
+    <div class="img-holder">
+        <img src="img/Pearson_Language.jpg" width="400" />
+        <div class="palette"></div>
+    </div>
+    <div class="img-holder">
+        <img src="img/Lipton.jpg" width="400" />
         <div class="palette"></div>
     </div>
 </body>
