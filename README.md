@@ -43,6 +43,14 @@ Download and include **Paletteron.min.js** or **Paletteron.js** from the dist fo
 1. palette - The resulting palette returned from getPalette().
 2. paletteElement - The element to which it should print the debugging palette.
 
+## How To Test
+
+Since Paletteron builds on the javascript function getImageData(), it might not allow you to simply open one of the test exmaples. Thus, you need to start a simple local server using Python, like so:
+
+```
+python -m http.server 8000
+```
+
 ## Examples
 
 ### Code Example

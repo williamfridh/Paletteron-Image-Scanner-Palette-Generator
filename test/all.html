@@ -3,7 +3,7 @@
 <head>
     <title>Test</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-    <script src="../Paletteron.js"></script>
+    <script src="../dist/Paletteron.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOMContentLoaded');
@@ -17,13 +17,19 @@
                 // Add listener to wait for image to be loaded
                 if (img.complete) {
                     console.log('Image already loaded');
+                    console.time('getPalette');
                     const palette = paletteron.getPalette(img);
+                    console.timeLog('getPalette');
                     paletteron.printDebuggingPalette(palette, paletteElement);
+                    console.timeEnd('getPalette');
                 } else {
                     img.addEventListener('load', () => {
                         console.log('Image loaded');
+                        console.time('getPalette');
                         const palette = paletteron.getPalette(img);
+                        console.timeLog('getPalette');
                         paletteron.printDebuggingPalette(palette, paletteElement);
+                        console.timeEnd('getPalette');
                     });
                 }
         
@@ -47,7 +53,7 @@
     <div class="img-holder">
         <img src="img/Localiza.jpg" width="400" />
         <div class="palette"></div>
-    </div>
+    </div><!--
     <div class="img-holder">
         <img src="img/Bite.jpg" width="400" />
         <div class="palette"></div>
@@ -83,7 +89,7 @@
     <div class="img-holder">
         <img src="img/Lipton.jpg" width="400" />
         <div class="palette"></div>
-    </div>
+    </div>-->
 </body>
 </html>
 
