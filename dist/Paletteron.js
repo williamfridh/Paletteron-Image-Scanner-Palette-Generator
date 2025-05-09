@@ -29,7 +29,7 @@
  * Author:      William Fridh
  * GitHub:      https://github.com/williamfridh
  * Repository:  https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker
- * Version:     1.1.0
+ * Version:     1.1.1
  */
 
 class Paletteron {
