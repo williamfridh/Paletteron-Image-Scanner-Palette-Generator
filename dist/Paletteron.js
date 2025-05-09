@@ -15,8 +15,8 @@
  * 5. Print the palette to an HTML element for debugging by calling printDebuggingPalette.
  * 
  * PARAMETERS:
- * 1. scale - The scale to downscale the image with (recommended is 0.3).
- * 2. colorsToPick - The amount of colors to pick from the image (recommended is 5).
+ * 1. colorsToPick - The amount of colors to pick from the image (recommended is 5).
+ * 2. speed - The speed of the algorithm (fast, medium, slow) (recommended is medium).
  * 3. minCoverage - The minimum coverage of a color to be included in the palette (recommended is 0).
  * 4. minWhiteDistance - Percentage of maximum color space distance to be min to include color (recommended is 0).
  * 5. minBlackDistance - Percentage of maximum color space distance to be min to include color (recommended is 0).
@@ -29,7 +29,7 @@
  * Author:      William Fridh
  * GitHub:      https://github.com/williamfridh
  * Repository:  https://github.com/williamfridh/Paletteron-Image-Scanner-Palette-Maker
- * Version:     1.0.2
+ * Version:     1.1.0
  */
 
 class Paletteron {
@@ -48,16 +48,14 @@ class Paletteron {
      * Opertunity to set the scale, colors to pick and min coverage.
      * Larger scale will result in faster processing but less accurate results.
      * 
-     * @param {number} scale - The scale to downscale the image with.
      * @param {number} colorsToPick - The amount of colors to pick from the image.
+     * @param {string} speed - The speed of the algorithm (fast, medium, slow).
      * @param {number} minCoverage - The minimum coverage of a color to be included in the palette.
      * @param {number} minWhiteDistance - Percentage of maximum color space distance to be min to include color.
      * @param {number} minBlackDistance - Percentage of maximum color space distance to be min to include color.
      */
-    constructor(scale, colorsToPick, minCoverage, minWhiteDistance, minBlackDistance) {
+    constructor(colorsToPick, speed, minCoverage, minWhiteDistance, minBlackDistance) {
         // Check input values
-        if (scale && (scale < 0 || scale > 1))
-            throw new Error(`Scale must be between 0 and 1.`)
         if (colorsToPick && (colorsToPick < 1 || colorsToPick > Paletteron.MAX_COLORS_AMOUNT))
             throw new Error(`Colors to pick must be between 1 and ${Paletteron.MAX_COLORS_AMOUNT}.`)
         if (minCoverage && (minCoverage < 0 || minCoverage > 1))
@@ -67,11 +65,30 @@ class Paletteron {
         if (minBlackDistance && (minBlackDistance < 0 || minBlackDistance > 1))
             throw new Error(`Ignore dark must be between 0 and 1.`)
         // Set the values
-        this.scale                  = scale                 || 0.2
         this.colorsToPick           = colorsToPick          || 5
+        this.speed                  = speed                 || 'medium'
         this.minCoverage            = minCoverage           || 0
         this.minWhiteDistance       = minWhiteDistance      || 0
         this.minBlackDistance       = minBlackDistance      || 0
+
+        switch (this.speed) {
+            case 'fast':
+                this.averageColorDistanceJump = 8;
+                this.scale = 0.2;
+                break;
+            case 'medium':
+                this.averageColorDistanceJump = 5;
+                this.scale = 0.3;
+                break;
+            case 'slow':
+                this.averageColorDistanceJump = 3;
+                this.scale = 0.5;
+                break;
+            default:
+                averageColorDistanceJump = 5;
+                this.scale = 0.3;
+                console.warn(`Speed not recognized, defaulting to medium.`);
+        }
     }
 
     /**
@@ -94,22 +111,22 @@ class Paletteron {
 
         // Process the pixels to find the most common colors
         const flattenedColors = this.flattenColors(pixels);
-        console.log(`flattenedColors: `, flattenedColors);
+        //console.log(`flattenedColors: `, flattenedColors);
 
         const colorsWithoutBrightDark = this.removeBrightDarkColors(flattenedColors);
-        console.log(`colorsWithoutBrightDark: `, colorsWithoutBrightDark);
+        //console.log(`colorsWithoutBrightDark: `, colorsWithoutBrightDark);
 
-        const bundledColors = this.bundleColors(colorsWithoutBrightDark);
-        console.log(`bundledColors: `, bundledColors);
+        const noLowCoverageColors = this.removeLowCoverageColors(colorsWithoutBrightDark, pixels.length);
+        //console.log(`noLowCoverageColors: `, noLowCoverageColors);
 
-        const noLowCoverageColors = this.removeLowCoverageColors(bundledColors, pixels.length);
-        console.log(`noLowCoverageColors: `, noLowCoverageColors);
+        const bundledColors = this.bundleColors(noLowCoverageColors);
+        //console.log(`bundledColors: `, bundledColors);
 
-        const colorsWithScore = this.calculateScore(noLowCoverageColors);
-        console.log(`colorsWithScore: `, colorsWithScore);
+        const colorsWithScore = this.calculateScore(bundledColors);
+        //console.log(`colorsWithScore: `, colorsWithScore);
 
         const finalColors = this.finalizeColors(colorsWithScore);
-        console.log(`finalColors: `, finalColors);
+        //console.log(`finalColors: `, finalColors);
 
         // Cleanup the canvas
         canvas.remove();
@@ -152,6 +169,7 @@ class Paletteron {
      * @returns {[HTMLCanvasElement, CanvasRenderingContext2D]} - The canvas and its context.
      */
     downscale(picture) {
+
         // Calculate new dimensions
         const w = picture.width * this.scale;
         const h = picture.height * this.scale;
@@ -164,12 +182,6 @@ class Paletteron {
 
         // Draw the picture on the canvas
         context.drawImage(picture, 0, 0, w, h);
-
-        // Append the canvas to the document (hidden)
-        document.body.appendChild(canvas);
-        canvas.style.position = 'fixed';
-        canvas.style.top = '9999px';
-        canvas.style.left = '9999px';
 
         // Return the canvas and its context
         return [canvas, context];
@@ -266,8 +278,8 @@ class Paletteron {
         let colorPairs = 0;
 
         // Loop over each pair of colors
-        for (let i = 0; i < colors.length; i++) {
-            for (let j = i + 1; j < colors.length; j++) {
+        for (let i = 0; i < colors.length + this.averageColorDistanceJump; i = i + this.averageColorDistanceJump) {
+            for (let j = i + this.averageColorDistanceJump; j < colors.length; j = j + this.averageColorDistanceJump) {
                 // Calculate the distance between the two colors
                 totalColorSpaceDistance += this.calculateDistance(
                     [colors[i].r, colors[i].g, colors[i].b],
@@ -291,11 +303,12 @@ class Paletteron {
      * @returns {Object[]} - The bundled array of color objects.
      */
     bundleColors(colors) {
-        // Sort the array by the amount of pixels of each color to prioritize the most common colors.
-        colors.sort((a, b) => b.amount - a.amount);
 
         // Calculate the average color distance.
         const averageColorDistance = this.findAverageColorDistance(colors);
+
+        // Sort the array by the amount of pixels of each color to prioritize the most common colors.
+        colors.sort((a, b) => b.amount - a.amount);
 
         // Bundle/merge colors that are close to each other.
         for (let i = 0; i < colors.length; i++) {
