@@ -14,7 +14,7 @@ Before usage, you need to install/include required files.
 File hosted by [JSDELIVER](https://www.jsdelivr.com/). Simply add this code to your site:
 
 ```
-<script src="https://cdn.jsdelivr.net/gh/williamfridh/Paletteron-Image-Scanner-Palette-Generator@main/dist/Paletteron.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/williamfridh/Paletteron-Image-Scanner-Palette-Generator@V1.1.0/dist/Paletteron.min.js"></script>
 ```
 
 ### Option 2
