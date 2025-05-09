@@ -2,12 +2,11 @@
 <html>
 <head>
     <title>Test</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-    <script src="../dist/Paletteron.min.js"></script>
+    <script src="../dist/Paletteron.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOMContentLoaded');
-            const paletteron = new Paletteron(5);
+            const paletteron = new Paletteron(0.3, 5, 0);
             let totalTime = 0;
             let callCount = 0;
 
