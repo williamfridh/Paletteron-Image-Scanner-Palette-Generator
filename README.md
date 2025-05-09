@@ -32,8 +32,8 @@ Download and include **Paletteron.min.js** or **Paletteron.js** from the dist fo
 
 ### getPalette()
 **PARAMETERS:**
-1. scale - The scale to downscale the image with (recommended is 0.3).
-2. colorsToPick - The amount of colors to pick from the image (recommended is 5).
+1. colorsToPick - The amount of colors to pick from the image (recommended is 5).
+2. speed - The speed of the algorithm (fast, medium, slow) (recommended is medium).
 3. minCoverage - The minimum coverage of a color to be included in the palette (recommended is 0).
 4. minWhiteDistance - Percentage of maximum color space distance to be min to include color (recommended is 0).
 5. minBlackDistance - Percentage of maximum color space distance to be min to include color (recommended is 0).
@@ -52,6 +52,8 @@ python -m http.server 8000
 ```
 
 ## Examples
+
+**See file:** test/all.html
 
 ### Code Example
 

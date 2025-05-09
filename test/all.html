@@ -3,36 +3,49 @@
 <head>
     <title>Test</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
-    <script src="../dist/Paletteron.js"></script>
+    <script src="../dist/Paletteron.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOMContentLoaded');
-            const paletteron = new Paletteron(0.3, 5);
+            const paletteron = new Paletteron(5);
+            let totalTime = 0;
+            let callCount = 0;
+
             // For each image
             const imgHolders = document.querySelectorAll('.img-holder');
             imgHolders.forEach(imgHolder => {
-                const img = imgHolder.querySelector('img');
-                const paletteElement = imgHolder.querySelector('.palette');
+            const img = imgHolder.querySelector('img');
+            const paletteElement = imgHolder.querySelector('.palette');
 
-                // Add listener to wait for image to be loaded
-                if (img.complete) {
-                    console.log('Image already loaded');
-                    console.time('getPalette');
-                    const palette = paletteron.getPalette(img);
-                    console.timeLog('getPalette');
-                    paletteron.printDebuggingPalette(palette, paletteElement);
-                    console.timeEnd('getPalette');
-                } else {
-                    img.addEventListener('load', () => {
-                        console.log('Image loaded');
-                        console.time('getPalette');
-                        const palette = paletteron.getPalette(img);
-                        console.timeLog('getPalette');
-                        paletteron.printDebuggingPalette(palette, paletteElement);
-                        console.timeEnd('getPalette');
-                    });
-                }
-        
+            // Add listener to wait for image to be loaded
+            const processImage = () => {
+                console.log('Processing image');
+                const startTime = performance.now();
+                const palette = paletteron.getPalette(img);
+                const endTime = performance.now();
+                totalTime += (endTime - startTime);
+                callCount++;
+                paletteron.printDebuggingPalette(palette, paletteElement);
+            };
+
+            if (img.complete) {
+                console.log('Image already loaded');
+                processImage();
+            } else {
+                img.addEventListener('load', () => {
+                console.log('Image loaded');
+                processImage();
+                });
+            }
+            });
+
+            // Log the average time after all images are processed
+            window.addEventListener('load', () => {
+            if (callCount > 0) {
+                console.log(`Average time per getPalette call: ${totalTime / callCount} ms`);
+            } else {
+                console.log('No getPalette calls were made.');
+            }
             });
         });
     </script>
@@ -53,7 +66,7 @@
     <div class="img-holder">
         <img src="img/Localiza.jpg" width="400" />
         <div class="palette"></div>
-    </div><!--
+    </div>
     <div class="img-holder">
         <img src="img/Bite.jpg" width="400" />
         <div class="palette"></div>
@@ -89,7 +102,7 @@
     <div class="img-holder">
         <img src="img/Lipton.jpg" width="400" />
         <div class="palette"></div>
-    </div>-->
+    </div>
 </body>
 </html>
 
