@@ -56,14 +56,22 @@ class Paletteron {
      */
     constructor(colorsToPick, speed, minCoverage, minWhiteDistance, minBlackDistance) {
         // Check input values
-        if (colorsToPick && (colorsToPick < 1 || colorsToPick > Paletteron.MAX_COLORS_AMOUNT))
-            throw new Error(`Colors to pick must be between 1 and ${Paletteron.MAX_COLORS_AMOUNT}.`)
-        if (minCoverage && (minCoverage < 0 || minCoverage > 1))
-            throw new Error(`Min coverage must be between 0 and 1.`)
-        if (minWhiteDistance && (minWhiteDistance < 0 || minWhiteDistance > 1))
-            throw new Error(`Ignore bright must be between 0 and 1.`)
-        if (minBlackDistance && (minBlackDistance < 0 || minBlackDistance > 1))
-            throw new Error(`Ignore dark must be between 0 and 1.`)
+        if (colorsToPick && (colorsToPick < 1 || colorsToPick > Paletteron.MAX_COLORS_AMOUNT)) {
+            console.error(`Colors to pick must be between 1 and ${Paletteron.MAX_COLORS_AMOUNT}. Setting to default 5.`)
+            colorsToPick = 5
+        }
+        if (minCoverage && (minCoverage < 0 || minCoverage > 1)) {
+            console.error(`Min coverage must be between 0 and 1. Setting to default 0.`)
+            minCoverage = 0
+        }
+        if (minWhiteDistance && (minWhiteDistance < 0 || minWhiteDistance > 1)) {
+            console.error(`Ignore bright must be between 0 and 1. Setting to default 0.`)
+            minWhiteDistance = 0
+        }
+        if (minBlackDistance && (minBlackDistance < 0 || minBlackDistance > 1)) {
+            console.error(`Ignore dark must be between 0 and 1. Setting to default 0.`)
+            minBlackDistance = 0
+        }
         // Set the values
         this.colorsToPick           = colorsToPick          || 5
         this.speed                  = speed                 || 'medium'
@@ -85,7 +93,7 @@ class Paletteron {
                 this.scale = 0.5;
                 break;
             default:
-                averageColorDistanceJump = 5;
+                this.averageColorDistanceJump = 5;
                 this.scale = 0.3;
                 console.warn(`Speed not recognized, defaulting to medium.`);
         }
