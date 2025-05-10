@@ -40,7 +40,7 @@ class Paletteron {
      * These variables are to not be changed and are used for calculations.
      */
     static MAX_COLORS_AMOUNT = 16777216         // 256^3
-    static MAX_COLORS_SPACE_DISTANCE = 443.405  // sqrt(3*256^3)
+    static MAX_COLORS_SPACE_DISTANCE = 100//443.405  // sqrt(3*256^3)
 
     /**
      * Constructor.
@@ -208,7 +208,7 @@ class Paletteron {
         return colors.filter(color => {
             const darkDistanceScaler = Paletteron.MAX_COLORS_SPACE_DISTANCE * this.minBlackDistance;
             const brightDistanceScaler = Paletteron.MAX_COLORS_SPACE_DISTANCE * this.minWhiteDistance;
-            return this.calculateDistance([color.r, color.g, color.b], [255, 255, 255]) > brightDistanceScaler && this.calculateDistance([color.r, color.g, color.b], [0, 0, 0]) > darkDistanceScaler;
+            return this.calculatePerceptualDistance([color.r, color.g, color.b], [255, 255, 255]) > brightDistanceScaler && this.calculatePerceptualDistance([color.r, color.g, color.b], [0, 0, 0]) > darkDistanceScaler;
         });
     }
 
@@ -289,7 +289,7 @@ class Paletteron {
         for (let i = 0; i < colors.length + this.averageColorDistanceJump; i = i + this.averageColorDistanceJump) {
             for (let j = i + this.averageColorDistanceJump; j < colors.length; j = j + this.averageColorDistanceJump) {
                 // Calculate the distance between the two colors
-                totalColorSpaceDistance += this.calculateDistance(
+                totalColorSpaceDistance += this.calculatePerceptualDistance(
                     [colors[i].r, colors[i].g, colors[i].b],
                     [colors[j].r, colors[j].g, colors[j].b]
                 );
@@ -322,9 +322,9 @@ class Paletteron {
         for (let i = 0; i < colors.length; i++) {
             for (let j = i + 1; j < colors.length; j++) {
                 // If the distance between the colors is less than the average distance, merge them.
-                if (this.calculateDistance([colors[i].r, colors[i].g, colors[i].b], [colors[j].r, colors[j].g, colors[j].b]) < averageColorDistance) {
+                if (this.calculatePerceptualDistance([colors[i].r, colors[i].g, colors[i].b], [colors[j].r, colors[j].g, colors[j].b]) < averageColorDistance) {
                     // Scale the amount based on the distance between the colors.
-                    const distanceScaler = this.calculateDistance([colors[i].r, colors[i].g, colors[i].b], [colors[j].r, colors[j].g, colors[j].b]) / averageColorDistance;
+                    const distanceScaler = this.calculatePerceptualDistance([colors[i].r, colors[i].g, colors[i].b], [colors[j].r, colors[j].g, colors[j].b]) / averageColorDistance;
                     colors[i].amount += colors[j].amount * distanceScaler;
                     colors.splice(j, 1);
                     j--;
@@ -404,7 +404,7 @@ class Paletteron {
         
         // Calculate the total distance of each color to the center.
         for (const color of colors) {
-            totalDistance += this.calculateDistance([color.r, color.g, color.b], center);
+            totalDistance += this.calculatePerceptualDistance([color.r, color.g, color.b], center);
         }
         
         // Return the average distance.
@@ -437,7 +437,7 @@ class Paletteron {
             color.score += color.amount / totalColors;
 
             // Add score for the distance to the color center, scaled by the logarithm of the amount.
-            color.score += (this.calculateDistance([color.r, color.g, color.b], colorCenter) / averageDistanceToCenter) * Math.log(color.amount);
+            color.score += (this.calculatePerceptualDistance([color.r, color.g, color.b], colorCenter) / averageDistanceToCenter) * Math.log(color.amount);
         }
 
         // Sort the colors by their score in descending order.
@@ -469,6 +469,63 @@ class Paletteron {
         
         // Return the array of RGB colors
         return rgbColors;
+    }
+
+    rgbToXyz(r, g, b) {
+        // Normalize RGB values to the range [0, 1]
+        r = r / 255;
+        g = g / 255;
+        b = b / 255;
+
+        // Apply gamma correction
+        r = r > 0.04045 ? Math.pow((r + 0.055) / 1.055, 2.4) : r / 12.92;
+        g = g > 0.04045 ? Math.pow((g + 0.055) / 1.055, 2.4) : g / 12.92;
+        b = b > 0.04045 ? Math.pow((b + 0.055) / 1.055, 2.4) : b / 12.92;
+
+        // Convert to XYZ using the D65 illuminant
+        const x = (r * 0.4124564 + g * 0.3575761 + b * 0.1804375) * 100;
+        const y = (r * 0.2126729 + g * 0.7151522 + b * 0.0721750) * 100;
+        const z = (r * 0.0193339 + g * 0.1191920 + b * 0.9503041) * 100;
+
+        return [x, y, z];
+    }
+
+    xyzToLab(x, y, z) {
+        // Reference white point (D65)
+        const refX = 95.047;
+        const refY = 100.000;
+        const refZ = 108.883;
+
+        x = x / refX;
+        y = y / refY;
+        z = z / refZ;
+
+        // Apply the Lab transformation
+        x = x > 0.008856 ? Math.cbrt(x) : (x * 7.787) + (16 / 116);
+        y = y > 0.008856 ? Math.cbrt(y) : (y * 7.787) + (16 / 116);
+        z = z > 0.008856 ? Math.cbrt(z) : (z * 7.787) + (16 / 116);
+
+        const l = (116 * y) - 16;
+        const a = 500 * (x - y);
+        const b = 200 * (y - z);
+
+        return [l, a, b];
+    }
+
+    rgbToLab(r, g, b) {
+        const [x, y, z] = this.rgbToXyz(r, g, b);
+        return this.xyzToLab(x, y, z);
+    }
+
+    calculatePerceptualDistance(color1, color2) {
+        const [l1, a1, b1] = this.rgbToLab(color1[0], color1[1], color1[2]);
+        const [l2, a2, b2] = this.rgbToLab(color2[0], color2[1], color2[2]);
+
+        const deltaL = l1 - l2;
+        const deltaA = a1 - a2;
+        const deltaB = b1 - b2;
+
+        return Math.sqrt(deltaL * deltaL + deltaA * deltaA + deltaB * deltaB);
     }
 
 }
